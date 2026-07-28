@@ -1,4 +1,4 @@
-const { createTodo, getTodos } = require('../services/todoService');
+const { createTodo, getTodo, updateTodo, deleteTodo } = require('../services/todoService');
 
 const create = async (req, res) => {
   try {
@@ -37,4 +37,37 @@ const list = async (req, res) => {
   }
 };
 
-module.exports = { create, list };
+const update = async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const todo = await updateTodo({
+      todoId: req.params.id,
+      userId: req.userId,
+      title,
+      description,
+    });
+
+    res.status(200).json({
+      id: todo._id,
+      title: todo.title,
+      description: todo.description,
+    });
+  } catch (error) {
+    const status = error.status || 500;
+    const message = error.status ? error.message : 'Something went wrong';
+    res.status(status).json({ message });
+  }
+};
+
+const remove = async (req, res) => {
+  try {
+    await deleteTodo({ todoId: req.params.id, userId: req.userId });
+    res.status(204).send();
+  } catch (error) {
+    const status = error.status || 500;
+    const message = error.status ? error.message : 'Something went wrong';
+    res.status(status).json({ message });
+  }
+};
+
+module.exports = { create, list, update, remove };
